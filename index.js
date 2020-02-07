@@ -17,9 +17,9 @@ cursor
 .bg.reset()
 .write('\n');
 
-//ДЗ
-//1. Доработать этот скрипт
-//2. Расширенное. Взять другую похожую библиотеку и использовать ее для изменения цвета шрифта
-//https://www.npmjs.com/package/colors
-
-//Важно. При сдаче ДЗ необходимо удалить папку node_modudes
+var colors = require('colors');
+ 
+console.log('This'.green);
+console.log('is'.underline.red);
+console.log('task2'.inverse);
+console.log('of lesson1!'.rainbow);
