@@ -19,7 +19,8 @@ cursor
 
 var colors = require('colors');
  
-console.log('This'.green);
-console.log('is'.underline.red);
-console.log('task2'.inverse);
-console.log('of lesson1!'.rainbow);
+console.log('And'.green);
+console.log('this'.underline.red);
+console.log('is'.inverse);
+console.log('task2'.rainbow);
+console.log('of lesson1!'.zebra);
