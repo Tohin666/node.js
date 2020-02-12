@@ -1,26 +1,44 @@
-console.log('Hello Node.js!');
+const readline = require('readline');
 
-const ansi = require('ansi');
+const resourse = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
 
-const cursor = ansi(process.stdout);
+console.log('Enter 1 or 2. Enter e to exit.');
 
-cursor
-.white()
-.bg.green()
-.write('Hello world!')
-.bg.reset()
-.write('\n')
-.blue()
-.bg.white()
-.write('This is task1 of lesson1!')
-.reset()
-.bg.reset()
-.write('\n');
+resourse.on('line', (cmd) => {
+    console.log(`You entered: ${cmd}`);
 
-var colors = require('colors');
- 
-console.log('And'.green);
-console.log('this'.underline.red);
-console.log('is'.inverse);
-console.log('task2'.rainbow);
-console.log('of lesson1!'.zebra);
+    if (cmd === 'e' || cmd === 'exit') {
+        resourse.close();
+    }
+
+    const number = Math.round(Math.random()) + 1;
+
+    const spinner = ['|', '/', '-', '\\'];
+
+    let count = 0;
+    const timer = setInterval(() => {
+        console.clear();
+        console.log(spinner[count]);
+
+        if (count != 3) {
+            count++;
+        } else {
+            count = 0;
+        }
+
+    }, 500);
+
+    setTimeout(() => {
+        clearInterval(timer);
+        if (cmd == number) {
+            console.log('You guessed it!!!');
+        } else {
+            console.log('You wrong((');
+        }
+        console.log('Enter 1 or 2. Enter e to exit.');
+    }, 4000);
+
+});
