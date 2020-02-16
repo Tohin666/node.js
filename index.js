@@ -1,44 +1,20 @@
-const readline = require('readline');
+const request = require('request');
+const cheerio = require('cheerio');
 
-const resourse = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-});
+request('https://www.kinopoisk.ru/', (err, response, body) => {
 
-console.log('Enter 1 or 2. Enter e to exit.');
+    if (!err && response.statusCode === 200) {
 
-resourse.on('line', (cmd) => {
-    console.log(`You entered: ${cmd}`);
+        const $ = cheerio.load(body);
 
-    if (cmd === 'e' || cmd === 'exit') {
-        resourse.close();
+        $('.today-in-cinema .carousel__inner').children().each((idx, element) => {
+
+            if ($(element).find('.film-poster-snippet-partial-component__title').text()) {
+
+                console.log($(element).find('.film-poster-snippet-partial-component__title').text());
+                console.log($(element).find('.film-poster-snippet-partial-component__caption').text());
+                console.log('-----------------------------------------------------');
+            }
+        });
     }
-
-    const number = Math.round(Math.random()) + 1;
-
-    const spinner = ['|', '/', '-', '\\'];
-
-    let count = 0;
-    const timer = setInterval(() => {
-        console.clear();
-        console.log(spinner[count]);
-
-        if (count != 3) {
-            count++;
-        } else {
-            count = 0;
-        }
-
-    }, 500);
-
-    setTimeout(() => {
-        clearInterval(timer);
-        if (cmd == number) {
-            console.log('You guessed it!!!');
-        } else {
-            console.log('You wrong((');
-        }
-        console.log('Enter 1 or 2. Enter e to exit.');
-    }, 4000);
-
 });
