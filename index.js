@@ -1,5 +1,15 @@
+const express = require('express');
+const app = express();
+
 const request = require('request');
 const cheerio = require('cheerio');
+const consolidate = require('consolidate');
+const path = require('path');
+
+app.engine('hbs', consolidate.handlebars);
+app.set('view engine', 'hbs');
+app.set('views', path.resolve(__dirname, 'views'));
+
 
 request('https://www.kinopoisk.ru/', (err, response, body) => {
 
