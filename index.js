@@ -1,24 +1,46 @@
 const express = require('express');
-const app = express();
-
+const mongoose = require('mongoose');
 const request = require('request');
 const cheerio = require('cheerio');
 const consolidate = require('consolidate');
 const path = require('path');
 
+const Task = require('./models/task');
+
+mongoose.connect('mongodb://localhost:27017/tasks', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+const app = express();
+
 app.engine('hbs', consolidate.handlebars);
 app.set('view engine', 'hbs');
 app.set('views', path.resolve(__dirname, 'views'));
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+
 app.get('/', (req, res) => {
-
-    res.render('template', {});
-
+    renderTemplate(res);
 });
 
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
+    const newTask = new Task(req.body);
+    
+    await newTask.save();
+    renderTemplate(res);
+});
+
+
+async function renderTemplate(res) {
+    const tasks = await Task.find().lean();
+    res.render('template', {tasks});
+}
+
+
+app.post('/qqq', (req, res) => {
 
     getTodayInCinema().then((todayInCinema) => {
 
@@ -56,6 +78,7 @@ function getTodayInCinema() {
     });
 
 }
+
 
 app.listen(4000, () => {
     console.log('Server works!');
