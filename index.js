@@ -27,56 +27,46 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', async (req, res) => {
+
     const newTask = new Task(req.body);
-    
     await newTask.save();
+
+    renderTemplate(res);
+});
+
+app.post('/modify', async (req, res) => {
+
+    switch (req.body.modify) {
+
+        case 'Done':
+            Task.updateOne({ _id: req.body.id }, { active: false }, function (err, res) {
+                if (err) console.log(handleError(err));
+            }).lean();
+            break;
+
+        case 'Undone':
+            Task.updateOne({ _id: req.body.id }, { active: true }, function (err, res) {
+                if (err) console.log(handleError(err));
+            }).lean();
+            break;
+
+        case 'Delete':
+            Task.deleteOne({ _id: req.body.id }, function (err) {
+                if (err) console.log(handleError(err));
+            }).lean();
+            break;
+
+        default:
+            break;
+    }
+
     renderTemplate(res);
 });
 
 
 async function renderTemplate(res) {
     const tasks = await Task.find().lean();
-    res.render('template', {tasks});
-}
-
-
-app.post('/qqq', (req, res) => {
-
-    getTodayInCinema().then((todayInCinema) => {
-
-        todayInCinema.splice(req.body.count);
-
-        res.render('template', { todayInCinema: todayInCinema });
-    });
-});
-
-function getTodayInCinema() {
-    return new Promise(function (resolve, reject) {
-
-        const todayInCinema = [];
-
-        request('https://www.kinopoisk.ru/', (err, response, body) => {
-
-            if (!err && response.statusCode === 200) {
-
-                const $ = cheerio.load(body);
-
-                $('.today-in-cinema .carousel__inner').children().each((idx, element) => {
-
-                    if ($(element).find('.film-poster-snippet-partial-component__title').text()) {
-
-                        todayInCinema.push({
-                            title: $(element).find('.film-poster-snippet-partial-component__title').text(),
-                            description: $(element).find('.film-poster-snippet-partial-component__caption').text()
-                        });
-                    }
-                });
-            }
-            
-            resolve(todayInCinema);
-        });
-    });
-
+    res.render('template', { tasks });
 }
 
 

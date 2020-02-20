@@ -1,18 +1,30 @@
 <h2>Task list</h2>
 <form method="POST" action="/">
-    <label for="count">Create new task:</label><br />
+    <label for="title">Create new task:</label><br />
     <input type="text" name="title" placeholder="Enter task name...">
     <input type="submit" value="Insert">
 </form>
 
-<div>      
+<div>
     {{#if tasks}}
     <ul>
         {{#each tasks}}
         <li>
-            {{this.title}} 
-            <input type="submit" name="{{this._id}}" value="Done">
-            <input type="submit" name="{{this._id}}" value="Delete">
+            <form method="POST" action="/modify">
+
+                {{#if active}}
+                {{this.title}}
+                <input type="submit" name="modify" value="Done">
+
+                {{else}}
+                <span style="text-decoration: line-through;">{{this.title}}</span>
+                <input type="submit" name="modify" value="Undone">
+                {{/if}}
+
+                <input type="submit" name="modify" value="Delete">
+
+                <input type="hidden" name="id" value="{{this._id}}">
+            </form>
         </li>
         {{/each}}
     </ul>
