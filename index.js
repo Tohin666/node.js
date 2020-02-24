@@ -1,61 +1,74 @@
 const express = require('express');
-const app = express();
-
+const mongoose = require('mongoose');
 const request = require('request');
 const cheerio = require('cheerio');
 const consolidate = require('consolidate');
 const path = require('path');
 
+const Task = require('./models/task');
+
+mongoose.connect('mongodb://localhost:27017/tasks', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+const app = express();
+
 app.engine('hbs', consolidate.handlebars);
 app.set('view engine', 'hbs');
 app.set('views', path.resolve(__dirname, 'views'));
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+
 app.get('/', (req, res) => {
-
-    res.render('template', {});
-
+    renderTemplate(res);
 });
 
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
 
-    getTodayInCinema().then((todayInCinema) => {
+    const newTask = new Task(req.body);
+    await newTask.save();
 
-        todayInCinema.splice(req.body.count);
-
-        res.render('template', { todayInCinema: todayInCinema });
-    });
+    renderTemplate(res);
 });
 
-function getTodayInCinema() {
-    return new Promise(function (resolve, reject) {
+app.post('/modify', async (req, res) => {
 
-        const todayInCinema = [];
+    switch (req.body.modify) {
 
-        request('https://www.kinopoisk.ru/', (err, response, body) => {
+        case 'Done':
+            Task.updateOne({ _id: req.body.id }, { active: false }, function (err, res) {
+                if (err) console.log(handleError(err));
+            }).lean();
+            break;
 
-            if (!err && response.statusCode === 200) {
+        case 'Undone':
+            Task.updateOne({ _id: req.body.id }, { active: true }, function (err, res) {
+                if (err) console.log(handleError(err));
+            }).lean();
+            break;
 
-                const $ = cheerio.load(body);
+        case 'Delete':
+            Task.deleteOne({ _id: req.body.id }, function (err) {
+                if (err) console.log(handleError(err));
+            }).lean();
+            break;
 
-                $('.today-in-cinema .carousel__inner').children().each((idx, element) => {
+        default:
+            break;
+    }
 
-                    if ($(element).find('.film-poster-snippet-partial-component__title').text()) {
+    renderTemplate(res);
+});
 
-                        todayInCinema.push({
-                            title: $(element).find('.film-poster-snippet-partial-component__title').text(),
-                            description: $(element).find('.film-poster-snippet-partial-component__caption').text()
-                        });
-                    }
-                });
-            }
-            
-            resolve(todayInCinema);
-        });
-    });
 
+async function renderTemplate(res) {
+    const tasks = await Task.find().lean();
+    res.render('template', { tasks });
 }
+
 
 app.listen(4000, () => {
     console.log('Server works!');
