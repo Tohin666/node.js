@@ -1,0 +1,45 @@
+<ul>
+    <li>
+        <a href="/">Главная</a>
+    </li>
+    <li>
+        <a href="/today-in-cinema">Сегодня в кино</a>
+    </li>
+    <li>
+        <a href="/user">Аккаунт</a>
+    </li>
+    <li>
+        <a href="/logout">Выйти из аккаунта</a>
+    </li>
+</ul>
+<hr>
+
+<h1>Задачи</h1>
+
+<ul>
+    {{#each tasks}}
+    <li>
+
+        {{#if this.completed}}Выполнена: {{/if}}
+        <a href="/tasks/{{this._id}}">{{this.title}}</a>
+
+        {{#unless this.completed}}
+        <form method="POST" action="/tasks/complete">
+            <input type="hidden" value="{{this._id}}" name="id">
+            <input type="submit" value="Задача выполнена!">
+        </form>
+        {{/unless}}
+        
+        <form method="POST" action="/tasks/remove">
+            <input type="hidden" value="{{this._id}}" name="id">
+            <input type="submit" value="Удалить задачу">
+        </form>
+    </li>
+    {{/each}}
+</ul>
+
+<hr>
+<form action="/tasks" method="POST">
+    <input type="text" placeholder="Введите название новой задачи" name="title">
+    <input type="submit" value="Добавить">
+</form>
