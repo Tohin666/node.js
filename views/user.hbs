@@ -1,0 +1,46 @@
+<ul>
+    <li>
+        <a href="/">Главная</a>
+    </li>
+    <li>
+        <a href="/tasks">Задачи</a>
+    </li>
+    <li>
+        <a href="/today-in-cinema">Сегодня в кино</a>
+    </li>
+    <li>
+        <a href="/logout">Выйти из аккаунта</a>
+    </li>
+</ul>
+<hr>
+
+<div>
+    <h1>Пользователь: {{user.email}}</h1>
+
+    <form method="POST" action="/user/update">
+        Имя: <input type="text" name="fullName" value="{{user.fullName}}" /><br />
+        Возраст: <input type="text" name="age" value="{{user.age}}" /><br />
+        <input type="submit" value="Изменить" /><br />
+    </form>
+
+    <hr>
+    <h2>Навыки</h2>
+    {{#if user.skils}}
+    <ul>
+        {{#each user.skils}}
+        <li>
+            <form method="POST" action="/user/remove">
+                {{this}}
+                <input type="hidden" value="{{@index}}" name="idx">
+                <input type="submit" value="Удалить">
+            </form>
+        </li>
+        {{/each}}
+    </ul>
+    {{/if}}
+
+    <form action="/user/skils" method="POST">
+        <input type="text" placeholder="Добавить навык" name="skil">
+        <input type="submit" value="Добавить">
+    </form>
+</div>
