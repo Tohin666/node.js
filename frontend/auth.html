@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Авторизация</h1>
+    <div>
+        <input type="text" id="username" placeholder="Enter email">
+    </div>
+    <div>
+        <input type="password" id="password" placeholder="Enter password">
+    </div>
+    <div>
+        <input type="submit" id="btnSendData">
+    </div>
+
+    <script>
+        const $username = document.getElementById('username');
+        const $password = document.getElementById('password');
+        const $btnSendData = document.getElementById('btnSendData');
+
+        $btnSendData.addEventListener('click', (event) => {
+            event.preventDefault();
+            localStorage.removeItem('token');
+
+            fetch('/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: $username.value,
+                    password: $password.value,
+                }),
+            })
+            .then((response) => {
+                if(response.status !== 200){
+                    //TODO: Стилизация формы, если ошибка
+                    return {token: null};
+                }
+
+                return response.json();
+            })
+            .then((response) => {
+                if(response.token){
+                    const {token, ...user} = response;
+                    //Save to local storage
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(user));
+
+                    window.location = '/';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

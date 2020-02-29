@@ -1,0 +1,32 @@
+<ul>
+    <li>
+        <a href="/">Главная</a>
+    </li>
+    <li>
+        <a href="/tasks">Задачи</a>
+    </li>
+    <li>
+        <a href="/user">Аккаунт</a>
+    </li>
+    <li>
+        <a href="/logout">Выйти из аккаунта</a>
+    </li>
+</ul>
+
+<h1>Сегодня в кино</h1>
+
+<form method="POST" action="/today-in-cinema">
+    <label for="count">Сколько фильмов показывать:</label><br />
+    <input type="number" name="count" value="5">
+    <input type="submit" value="Загрузить">
+</form>
+
+<div>
+    {{#if todayInCinema}}
+    <ul>
+        {{#each todayInCinema}}
+        <li>{{this.title}} - {{this.description}}</li>
+        {{/each}}
+    </ul>
+    {{/if}}
+</div>
