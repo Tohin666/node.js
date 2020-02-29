@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <h1>Основная страница</h1>
+    <ul id="list"></ul>
+    <button id="create">Create new task</button>
+
+    <h2>Сегодня в кино:</h2>
+    <ul id="news-list"></ul>
+    <button id="get-news">Получить</button>
+
+    <script>
+        window.addEventListener('load', () => {
+            const $list = document.getElementById('list');
+            const $btnCreateTask = document.getElementById('create');
+
+            const $newsList = document.getElementById('news-list');
+            const $btnGetNews = document.getElementById('get-news');
+
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+
+            if (!token) {
+                window.location = '/auth';
+            }
+
+            const socket = io.connect(`http://localhost:4000?token=${token}`);
+
+            socket.on(`created:${user._id}`, (task) => {
+                const $li = document.createElement('li');
+                const $button = document.createElement('button');
+                $button.textContent = task.completed ? 'Отменить выполнение' : 'Выполнить';
+
+                $li.dataset.id = task._id;
+                $li.textContent = task.title;
+                $li.appendChild($button);
+                $list.appendChild($li);
+            });
+
+            socket.on(`toggled:${user._id}`, (taskId) => {
+                const $button = document.querySelector(`[data-id="${taskId}"] > button`);
+                $button.textContent = $button.textContent === 'Отменить выполнение'
+                    ? 'Выполнить' : 'Отменить выполнение';
+            });
+
+
+            socket.on('Received', (news) => {
+                news.forEach((item) => {
+                    let $li = document.createElement('li');
+                    $li.textContent = `${item.title} - ${item.description}`;
+                    $newsList.appendChild($li);
+                });
+            });
+
+
+            //Send events to server
+            $list.addEventListener('click', (event) => {
+                if (event.target.tagName === 'BUTTON') {
+                    const $li = event.target.parentElement;
+                    const id = $li.dataset.id;
+                    console.log('Button id', id);
+                    socket.emit('toggle', id);
+                }
+            });
+
+            $btnCreateTask.addEventListener('click', (event) => {
+                socket.emit('create', {
+                    title: prompt('Enter the task name'),
+                    completed: false,
+                    user: user._id,
+                });
+                event.preventDefault();
+            });
+
+
+            $btnGetNews.addEventListener('click', (event) => {
+                socket.emit('getNews');
+                event.preventDefault();
+            });
+
+
+            //Get tasks
+            fetch('/tasks', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then((response) => {
+                    if (response.status !== 200) {
+                        localStorage.removeItem('token');
+                        window.location = '/auth';
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then((tasks) => {
+                    tasks.forEach((task) => {
+                        const $li = document.createElement('li');
+                        const $button = document.createElement('button');
+                        $button.textContent = task.completed ? 'Отменить выполнение' : 'Выполнить';
+
+                        $li.dataset.id = task._id;
+                        $li.textContent = task.title;
+                        $li.appendChild($button);
+                        $list.appendChild($li);
+                    });
+                });
+        });
+    </script>
+</body>
+
+</html>
